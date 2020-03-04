@@ -11,7 +11,14 @@ enabled=1\n\
 autorefresh=1\n\
 type=rpm-md" > /etc/yum.repos.d/logstash.repo
 
-RUN yum update -y && yum install git which initscripts cronie logstash logrotate -y
+RUN yum update -y && yum install -y \
+    git \
+    which \
+    initscripts \
+    cronie \
+    logstash \
+    logrotate \
+    wget
 
 RUN git clone https://github.com/awslabs/amazon-kinesis-agent.git
 RUN cd amazon-kinesis-agent && \
