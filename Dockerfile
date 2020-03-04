@@ -1,6 +1,17 @@
 FROM amazonlinux
 
-RUN yum update -y && yum install git which rsyslog initscripts cronie -y
+RUN rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch && \
+    mkdir -p /etc/yum.repos.d && \
+    printf "[logstash-7.x]\n\
+name=Elastic repository for 7.x packages\n\
+baseurl=https://artifacts.elastic.co/packages/7.x/yum\n\
+gpgcheck=1\n\
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch\n\
+enabled=1\n\
+autorefresh=1\n\
+type=rpm-md" > /etc/yum.repos.d/logstash.repo
+
+RUN yum update -y && yum install git which initscripts cronie logstash logrotate -y
 
 RUN git clone https://github.com/awslabs/amazon-kinesis-agent.git
 RUN cd amazon-kinesis-agent && \
@@ -13,7 +24,6 @@ RUN wget https://github.com/geofffranks/spruce/releases/download/v1.25.2/spruce-
 
 COPY . /app
 RUN chmod +x /app/entrypoint.sh && \
-    mv /app/rsyslog.conf /etc/rsyslog.conf && \
     mkdir /data && \
     touch /data/remote-syslog.log && \
     mv /app/logrotated_remote-syslog /etc/logrotate.d/remote-syslog && \

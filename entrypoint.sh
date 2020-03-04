@@ -6,6 +6,15 @@ set -m
 spruce merge /app/agent-template.json | spruce json - > /app/agent.json
 cp /app/agent.json /etc/aws-kinesis/agent.json
 
+# setup logstash configuration, unfortunately spruce doesn't work here
+if [ -z ${PORT+x} ]; then
+  PORT=10514
+fi
+sed -i 's@$PORT@'"$PORT"'@' /app/logstash-template.conf
+sed -i 's@$LOGSTASH_USER@'"$LOGSTASH_USER"'@' /app/logstash-template.conf
+sed -i 's@$LOGSTASH_PASSWORD@'"$LOGSTASH_PASSWORD"'@' /app/logstash-template.conf
+cp /app/logstash-template.conf /app/logstash.conf
+
 # start up the cron daemon
 /usr/sbin/crond
 
@@ -13,4 +22,4 @@ cp /app/agent.json /etc/aws-kinesis/agent.json
 /etc/rc.d/init.d/aws-kinesis-agent start
 
 # start rsyslogd as a non-forked process so tini manages
-/usr/sbin/rsyslogd -n
+/usr/share/logstash/bin/logstash -f /app/logstash.conf
