@@ -1,0 +1,22 @@
+{
+  "cloudwatch.emitMetrics": (( grab $CLOUDWATCH_EMITMETRICS || true )),
+  "kinesis.endpoint": (( grab $KINESIS_ENDPOINT || "" )),
+  "firehose.endpoint": (( grab $FIREHOSE_ENDPOINT || "" )),
+  "awsAccessKeyId": (( grab $AWS_ACCESS_KEY_ID || "" )) ,
+  "awsSecretAccessKey": (( grab $AWS_SECRET_ACCESS_KEY || "" )),
+
+
+  "flows": [
+    {
+      "filePattern": "/data/remote-syslog.log*",
+      "kinesisStream": (( grab $KINESIS_STREAM || "" )),
+      "partitionKeyOption": (( grab $PARTITION_KEY_OPTION || "RANDOM" )),
+      "dataProcessingOptions": [
+        {
+          "optionName": "SINGLELINE",
+          "matchPattern": (( grab $MATCH_PATTERN || "" ))
+        }
+      ]
+    }
+  ]
+}
