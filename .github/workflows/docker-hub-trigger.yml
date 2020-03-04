@@ -1,0 +1,16 @@
+name: Docker Hub Build Trigger
+
+on:
+  schedule:
+  - cron: "0 2 * * 3"
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Post to the Docker Hub build URL
+      run: curl -X POST ${{ secrets. BUILD_TRIGGER_URL  }}
