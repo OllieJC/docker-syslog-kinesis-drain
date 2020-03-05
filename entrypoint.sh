@@ -20,6 +20,7 @@ cp /app/logstash-template.conf /app/logstash.conf
 
 # start the aws-kinesis-agent daemon
 /etc/rc.d/init.d/aws-kinesis-agent start
+# logs in: /var/log/aws-kinesis-agent/aws-kinesis-agent.log
 
 # start rsyslogd as a non-forked process so tini manages
 /usr/share/logstash/bin/logstash -f /app/logstash.conf
