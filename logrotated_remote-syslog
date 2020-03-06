@@ -1,7 +1,7 @@
 /data/remote-syslog.log {
-    rotate 1
+    rotate 10
     size 100M
-    hourly
+    daily
     create 0644 root root
     missingok
 }

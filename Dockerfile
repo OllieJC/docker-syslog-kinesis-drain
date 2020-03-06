@@ -34,12 +34,13 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
-COPY . /app
+COPY agent-template.json /app/
+COPY entrypoint.sh /app/
+COPY logrotated_remote-syslog /app/
+COPY logstash.conf /app/
+COPY ruby-logstash-filter.rb /app/
 RUN chmod +x /app/entrypoint.sh && \
-    mkdir /data
-
-#touch /data/remote-syslog.log && \
-#mv /app/logrotated_remote-syslog /etc/logrotate.d/remote-syslog && \
-#echo "*/15 * * * * root /usr/sbin/logrotate -f /etc/logrotate.d/remote-syslog > /dev/null 2>&1" > /etc/cron.d/logrotate
+    mkdir /data && \
+    echo "*/15 * * * * root /usr/sbin/logrotate -f /app/logrotated_remote-syslog > /dev/null 2>&1" > /etc/cron.d/logrotate
 
 CMD ["/app/entrypoint.sh"]

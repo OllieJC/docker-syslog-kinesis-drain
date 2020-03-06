@@ -10,7 +10,7 @@
 
   "flows": [
     {
-      "filePattern": "/data/remote-syslog.log",
+      "filePattern": "/data/remote-syslog.*",
       "kinesisStream": (( grab $KINESIS_STREAM || "" )),
       "partitionKeyOption": (( grab $PARTITION_KEY_OPTION || "RANDOM" )),
       "dataProcessingOptions": [
