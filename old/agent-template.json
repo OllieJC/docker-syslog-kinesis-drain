@@ -5,8 +5,8 @@
   "firehose.endpoint": (( grab $FIREHOSE_ENDPOINT || "" )),
   "awsAccessKeyId": (( grab $AWS_ACCESS_KEY_ID || "" )) ,
   "awsSecretAccessKey": (( grab $AWS_SECRET_ACCESS_KEY || "" )),
-  "maxBufferAgeMillis": 10000,
-  "minTimeBetweenFilePollsMillis": 10,
+  "maxBufferAgeMillis": (( grab $MAX_BUFFER_AGE_MILLIS || 10000 )),
+  "minTimeBetweenFilePollsMillis": (( grab $MINTIME_BETWEEN_FILE_POLLS_MILLIS || 100 )),
 
   "flows": [
     {

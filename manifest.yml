@@ -4,9 +4,8 @@ applications:
     docker:
       image: olliejc/syslog-kinesis-drain:latest
 
-    memory: 1G
-    disk_quota: 4G
+    memory: 128M
+    disk_quota: 320M
     instances: 1
-
-    health-check-type: port
-    command: /app/entrypoint.sh
+    health-check-type: process
+    command: /app/fluent_startup.sh

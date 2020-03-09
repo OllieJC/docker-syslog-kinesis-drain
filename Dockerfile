@@ -1,46 +1,28 @@
-FROM amazonlinux
+FROM fluent/fluentd:latest
 
-RUN rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch && \
-    mkdir -p /etc/yum.repos.d && \
-    printf "[logstash-7.x]\n\
-name=Elastic repository for 7.x packages\n\
-baseurl=https://artifacts.elastic.co/packages/7.x/yum\n\
-gpgcheck=1\n\
-gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch\n\
-enabled=1\n\
-autorefresh=1\n\
-type=rpm-md" > /etc/yum.repos.d/logstash.repo
+ENV BUILD_DEPS="sudo build-base ruby-dev gettext"  \
+    RUNTIME_DEPS="libintl bash"
 
-RUN yum update -y && yum install -y \
-    git \
-    which \
-    initscripts \
-    cronie \
-    logstash \
-    logrotate \
-    wget
+RUN apk add --no-cache --update --virtual .build-deps $BUILD_DEPS && \
+    apk add --no-cache --update $RUNTIME_DEPS && \
+    cp /usr/bin/envsubst /usr/local/bin/envsubst
 
-RUN git clone https://github.com/awslabs/amazon-kinesis-agent.git
-RUN cd amazon-kinesis-agent && \
-    chmod +x ./setup && \
-    ./setup --install
+RUN sudo gem install fluent-plugin-kinesis && \
+    sudo gem sources --clear-all
 
-RUN wget https://github.com/geofffranks/spruce/releases/download/v1.25.2/spruce-linux-amd64 && \
-    mv spruce-linux-amd64 /usr/local/bin/spruce && \
-    chmod +x /usr/local/bin/spruce
+RUN apk del .build-deps && \
+    rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
 
-ENV TINI_VERSION v0.18.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
+WORKDIR /app
+COPY ./fluent_template.conf /app
+COPY ./fluent_startup.sh /app
+RUN chmod +x /app/fluent_startup.sh
 
-COPY agent-template.json /app/
-COPY entrypoint.sh /app/
-COPY logrotated_remote-syslog /app/
-COPY logstash.conf /app/
-COPY ruby-logstash-filter.rb /app/
-RUN chmod +x /app/entrypoint.sh && \
-    mkdir /data && \
-    echo "*/15 * * * * root /usr/sbin/logrotate -f /app/logrotated_remote-syslog > /dev/null 2>&1" > /etc/cron.d/logrotate
+RUN mkdir /app/log && \
+    chown 1000:1000 /app/log
 
-CMD ["/app/entrypoint.sh"]
+EXPOSE 10514/tcp
+EXPOSE 1514/tcp
+EXPOSE 1514/udp
+
+CMD ["/bin/sh","-c","/app/fluent_startup.sh"]
